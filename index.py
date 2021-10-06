@@ -18,12 +18,11 @@ random.shuffle(names)
 print(names)
 			
 class Player:
-	def __new__(self, name:str, dead=False, kills=0) -> object:
+	def __init__(self, name:str, dead=False, kills=0) -> object:
 		self.name = name
 		self.target = None
 		self.dead = dead
 		self.kills = kills
-		return self
 
 	# I don't understand python, so just leave this please for god's sake.
 	def get_player(self) -> object: return self
@@ -42,35 +41,38 @@ class Player:
 		if self.target is None: return StopIteration
 		return self.target
 	def __str__(self) -> str:
-		return f"{self.name} status: {self.dead} target: {self.target} score: {self.kills}"
+		return f"{self.name} status: {'dead' if self.dead else 'alive'} target: {self.target.name} score: {self.kills}"
 	def __iter__(self) -> str:
 		self.n = 0
 		return self
 
 class PlayerList:
 	def __init__(self, names):
-		self.first = self._player_chain(names)
-	def _player_chain(self, names) -> Player:
-		name = names.pop()
-		print(names)
-		if len(names) == 0:
-			player = Player(name)
-			print(f"last {player.name}")
-			return player
-		player = Player(name)
-		print(player.name)
-		# player.set_target(self._player_chain(names))
-		temp = self._player_chain(names)
-		print(f"{player.name} has {temp.name}")
-		# print(f'{player.name} has {player.target.name}\n')
-		return player
-	def __iter__(self):
-		self.n = 0
-		return self.first
+		self._generate_players(names)
+		self.player_list = self._assign_targets(self._generate_players(names))
 
-PlayerList(names)
+	def _generate_players(self, names) -> list: 
+		player_list = []
+		for i in range(len(names)):
+			name = names[i]
+			player_list.append(Player(name))
 
-	
+		return player_list
+		
+	def _assign_targets(self, player_list:list) -> list:
+		random.shuffle(player_list)
+		for i in range(len(player_list)):
+			if i == len(player_list) - 1:
+				player_list[i].target = player_list[0]
+			else:
+				player_list[i].target = player_list[i + 1]
+		return player_list
+	def __str__(self):
+		collection = ""
+		for player in self.player_list:
+			collection = f"{collection}{player}\n"
+		return collection
 
 
-	
+player_list = PlayerList(names)
+print(player_list)
