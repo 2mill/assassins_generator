@@ -1,11 +1,13 @@
 #!usr/bin/python
-import argparse, sys, random, mdutils
+import argparse, sys, random, os 
 from datetime import date
+
 
 parser = argparse.ArgumentParser(prog="py_ass", description="Can take a names list and generate a new list for an assassins game.", usage="py_ass -f [file]")
 
 parser.add_argument('-f', '--file', type=str, required=True, help="Names list text file.")
-
+parser.add_argument('-l', '--letter', action="store_true", required=False, help="Generate player letters.")
+parser.add_argument('--rules', type=str, required=False, help="If custom rules have been written, they can be applied to the player letter at the end of the letter.")
 args = parser.parse_args()
 
 def file_to_list(file_name: str) -> list :
@@ -74,6 +76,8 @@ class PlayerList:
 		return self.str_type("human")
 	def __str__(self):
 		return self.str_type()
+	def __iter__(self):
+		return self.player_list.__iter__()
 
 
 
@@ -83,7 +87,24 @@ with open(f"assassin_game-{date.today()}.txt", "w") as f:
 	f.write(player_list.str_human())
 	f.close()
 
+# Generate letters here.
 
+if args.letter:
+	letter = []
+	rules_file = args.rules 
+	rules = [] if rules_file is None else open(f"./{rules_file}", 'r').readlines()
+	directory_path = f"./letters-{date.today()}"
+	if not os.path.exists(directory_path):
+		os.mkdir(directory_path)
+	for player in player_list:
+		with open(f"{directory_path}/{player.name}-letter.txt", 'w') as f:
+			f.write(f"Hello {player.name},\n")
+			f.write(f"Your target is: {player.target.name}\n\n")
+			f.write("===RULES===\n")
+			for line in rules: f.write(line)
+			f.write("Good Luck!")
+			f.close()
 
+		
 
 
